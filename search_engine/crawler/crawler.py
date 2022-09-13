@@ -8,8 +8,8 @@ This is a temporary script file.
 import requests # for internet protocol comm.
 from bs4 import BeautifulSoup
 
-import pubmed_nltk_analysis as pubmed
-import pattern_matching as pm
+import crawler.pubmed_nltk_analysis as pubmed
+import crawler.pattern_matching as pm
 
 SEARCH_URL_PREFIX = 'https://pubmed.ncbi.nlm.nih.gov'
 
