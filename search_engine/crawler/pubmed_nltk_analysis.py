@@ -56,14 +56,20 @@ def basic_feature( text ):
     for index, word in enumerate( token ):
         num_char += len( word )
     
-    print( 'num_sentence:', num_sentence )
-    print( 'num_word:', num_word )
-    print( 'num_char:', num_char )
+    # print( 'num_sentence:', num_sentence )
+    # print( 'num_word:', num_word )
+    # print( 'num_char:', num_char )
     
-    # print( token )
+    basic_feat_dict = {
+        "num_sentence": num_sentence,
+        "num_word": num_word,
+        "num_char": num_char,
+        }
+    
+    return basic_feat_dict
 
 def nltk_pipeline( text ):
-    basic_feature( text )
+    basic_feat_dict = basic_feature( text )
     text, token = text_preprocess( text )
     # print( 'nltk_pipeline, processed text:' )
     # print( text )
@@ -72,3 +78,9 @@ def nltk_pipeline( text ):
     for keyword, value in freq_dist_nltk.items():
         # print( str( keyword ) + ':' + str( value ) )
         pass
+    
+    nltk_dict = {
+        'basic_feature' : basic_feat_dict,
+        'freq_dict' : freq_dist_nltk,
+        }
+    return nltk_dict

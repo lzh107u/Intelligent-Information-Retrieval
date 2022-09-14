@@ -7,6 +7,7 @@ Created on Thu Sep  8 10:59:50 2022
 
 import stweet as st
 import json
+import re
 
 def try_search( keyword = '' ):
     search_tweet_task = st.SearchTweetsTask( all_words = '#' + keyword )
@@ -42,6 +43,23 @@ def content_analysis( content_dict ):
             print( '---------- end of', name, '----------' )
     return
 
+def display_post( post_dict ):
+    for index, name in enumerate( post_dict ):
+        print( name, post_dict[ name ] )
+
+def remove_tags( text, hashtags ):
+    # print( text )
+    tags_text = ''
+    for index, tag in enumerate( hashtags ):
+        # print( 'tag', tag[ 'text' ] )
+        text = re.sub( '#' + tag[ 'text' ], '', text )
+        tags_text = tags_text + '#' + tag[ 'text' ] + ' '
+    
+    text = re.sub( 'https://t.co/[a-zA-Z0-9]+', '', text )
+    text = text.strip()
+    # print( text )
+    return text, tags_text
+
 def parser_single_tweet( line ):
     layer1_dict = json.loads( line )
     raw_value = layer1_dict[ 'raw_value' ]
@@ -50,8 +68,11 @@ def parser_single_tweet( line ):
     post_id = raw_value[ 'id' ]
     post_text = raw_value[ 'full_text' ]
     post_media_dict = raw_value[ 'entities' ][ 'media' ][ 0 ]
+    post_hashtags = raw_value[ 'entities' ][ 'hashtags' ]
     media_url = post_media_dict[ 'media_url_https' ]
     post_url = post_media_dict[ 'url' ]
+    
+    post_text, post_hashtags = remove_tags( post_text, post_hashtags )
     
     post_dict = {
         'timestamp' : post_timestamp,
@@ -59,11 +80,12 @@ def parser_single_tweet( line ):
         'text' : post_text,
         'media_url' : media_url,
         'url' : post_url,
+        'hashtags' : post_hashtags,
         }
-    
+    # display_post( post_dict )
     return post_dict
     
-def json_parser( keyword = 'midjourney', tweet_count = 20 ):
+def json_parser( keyword = 'midjourney', tweet_count = 3 ):
     filename = 'crawler/' + keyword + '_raw_search_tweets.jl'
     with open( filename, 'r' ) as f:
         posts_list = []

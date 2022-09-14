@@ -1,0 +1,9 @@
+{% load static %}
+
+{% block content %}
+    {% for index in car_range %}
+        <p>index: {{ index }}</p>
+        <p>forloop: {{ forloop.counter0 }}</p>
+    {% endfor %}
+{% endblock content %}
+

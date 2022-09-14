@@ -56,13 +56,19 @@ def parser_abstract_page( filename = '', buf = None ):
     authors_list = []
     flag_abstract = 0
     abstract_content = []
+    nltk_dict = None
+    abstract_text = None
+    check_list = [ False, False, False, False ]
     for index, line in enumerate( full_text ):
         if ( line.find( 'heading-title' ) > 0 ) and ( flag_title == 0 ):
+            check_list[ 0 ] = True
             ARTICLE_COUNT += 1
             # extract article title.
-            print( ARTICLE_COUNT, 'title:', full_text[ index + 1 ].strip() )
+            article_title = full_text[ index + 1 ].strip()
+            print( ARTICLE_COUNT, 'title:', article_title )
             flag_title = 1
         if ( line.find( 'authors-list-item' ) > 0 ):
+            check_list[ 1 ] = True
             # extract authors.
             new_name = full_text[ index + 2 ].strip()
             # remove redundant whitespaces
@@ -70,9 +76,10 @@ def parser_abstract_page( filename = '', buf = None ):
                 # check if current result had been found or not.
                 # same info. appeared in html message serveral times,
                 # which needed to be checked or it would result in an error.
-                # print( 'author:', new_name )
+                
                 authors_list.append( new_name ) # add newly found author.
         if ( line.find( 'enc-abstract' ) > 0 ):
+            check_list[ 2 ] = True
             # start extracting the abstract of article.
             flag_abstract = 1
             
@@ -80,19 +87,29 @@ def parser_abstract_page( filename = '', buf = None ):
             abstract_content.append( line.strip() )
             # extract line-by-line.
         elif ( flag_abstract == 1 and line.strip() == '</div>' ):
+            check_list[ 3 ] = True
             # stop extracting when encounter '</div>'
             abstract_text = pm.content_concat( abstract_content )
             # remove tags and concat every line together.
-            pubmed.nltk_pipeline( abstract_text )
+            nltk_dict = pubmed.nltk_pipeline( abstract_text )
             # perform nltk analysis.
-            return True
+            
+            break
     
     # some article didn't have the abstract part.
-    print( '--------------------' )
-    print( '     no abstract    ' )
-    print( '--------------------' )
+    # print( '--------------------' )
+    # print( '     no abstract    ' )
+    # print( '--------------------' )
+    article_dict = {   
+        'title' : article_title,
+        'authors' : authors_list,
+        'text' : abstract_text, # add concatenated text into dictionary.
+        'nltk_dict' : nltk_dict,
+        'check' : check_list, 
+        }
+    return article_dict
 
-def parser_search_page( buf = None, filename = '', read_file = True ):
+def parser_search_page( article_list, buf = None, filename = '', read_file = True ):
     global SEARCH_URL_PREFIX
     if read_file == True:
         with open( filename, 'r', encoding = 'UTF-8' ) as f:
@@ -115,6 +132,7 @@ def parser_search_page( buf = None, filename = '', read_file = True ):
     for index, line in enumerate( full_text ):
         ret = line.find( 'data-article-id=' )
         # the url of each article was contained in a line of html.
+        
         if ( ret > -1 ):
             res = line.split()[ 7 ]
             # split entire line into serveral tag parts
@@ -122,12 +140,12 @@ def parser_search_page( buf = None, filename = '', read_file = True ):
             res = res.split( '=' )[ 1 ][ 1:-1 ]
             # remove the symbol '"' at the head and tail of 'href' tag.
             # the extracted result should be liked: /{article_code}/
-            print( 'searching url:', SEARCH_URL_PREFIX + res )
+            # print( 'searching url:', SEARCH_URL_PREFIX + res )
             buf = send_crawler( url = SEARCH_URL_PREFIX + res )
             # send crawler with article url.
-            parser_abstract_page( buf = buf )
+            article_dict = parser_abstract_page( buf = buf )
             # extract every useful info. in html page from crawler.  
-            
+            article_list.append( article_dict )
     return res
 
 def parser_keyword( keyword_str ):
@@ -149,6 +167,7 @@ def crawler_pipeline( page_count = 1 ):
     global ARTICLE_COUNT
     
     ARTICLE_COUNT = 0
+    article_list = []
     default_keyword_str = 'Myotonic Dystrophy'
     page_str = '&page='
     searching_str = parser_keyword( default_keyword_str )
@@ -158,10 +177,12 @@ def crawler_pipeline( page_count = 1 ):
         #   e.g. : https://pubmed.ncbi.nlm.nih.gov/?term=+myotonic+dystrophy&page=2
         buf = send_crawler( write_file = False, url = SEARCH_URL_PREFIX + searching_str + page_str + str( index + 1 ) )
         # send a crawler with given url.
-        parser_search_page( read_file = False, buf = buf )
+        parser_search_page( article_list = article_list, read_file = False, buf = buf )
         # parse the returned html page from crawler.
+    
+    return article_list
 
 if __name__ == '__main__':
     filename = 'output_af.txt'
     keyword_str = ''
-    crawler_pipeline( page_count = 3 )
+    crawler_pipeline( page_count = 2 )
