@@ -109,8 +109,10 @@
               <a class="nav-link disabled">Disabled</a>
             </li>
           </ul>
-          <form class="d-flex" role="search">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <form class="d-flex" action="/crawler/test/" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="FormType" value="keyword">
+            <input class="form-control me-2" type="text" placeholder="Search" aria-label="Search" name="Keyword">
             <button class="btn btn-outline-success" type="submit">Search</button>
           </form>
         </div>
@@ -214,14 +216,29 @@
 <!-- start of posts display area -->
     <div class="col-md-8">
       <h3 class="pb-4 mb-4 fst-italic border-bottom">
-        From the Firehose
+        Searching Results
       </h3>
       {% block posts %}
-      {% for post in car_list %}
+      {% for post in pubmed_list %}
       <article class="blog-post">
-        <h2>{{ post.post.hashtags }}</h2>
-        <p>{{ post.post.text }}</p>
+        <h2>{{ post.title }}</h2>
+        <p class="blog-post-meta">
+        {% for author in post.authors %}
+            {{ author }},
+        {% endfor %}
+        view this article in 
+        <a href={{ post.url }}>MedPub</a></p>
+        <p>{{ post.text }}</p>
         <hr>
+        {% if post.abstract_exist %}
+        <h3>Basic Features</h3>
+        <ul>
+          <li>Number of sentences: {{ post.nltk_dict.basic_feature.num_sentence }}</li>
+          <li>Number of words: {{ post.nltk_dict.basic_feature.num_word }}</li>
+          <li>Number of characters: {{ post.nltk_dict.basic_feature.num_char }}</li>
+        </ul>
+        {% endif %}
+        
       </article>
       {% endfor %}
       {% endblock posts %}
@@ -276,67 +293,6 @@
         <h3>Sub-heading</h3>
         <p>This is some additional paragraph placeholder content. It has been written to fill the available space and show how a longer snippet of text affects the surrounding content. We'll repeat it often to keep the demonstration flowing, so be on the lookout for this exact same string of text.</p>
         <pre><code>Example code block</code></pre>
-        <p>This is some additional paragraph placeholder content. It's a slightly shorter version of the other highly repetitive body text used throughout.</p>
-      </article>
-
-      <article class="blog-post">
-        <h2 class="blog-post-title mb-1">Another blog post</h2>
-        <p class="blog-post-meta">December 23, 2020 by <a href="#">Jacob</a></p>
-
-        <p>This is some additional paragraph placeholder content. It has been written to fill the available space and show how a longer snippet of text affects the surrounding content. We'll repeat it often to keep the demonstration flowing, so be on the lookout for this exact same string of text.</p>
-        <blockquote>
-          <p>Longer quote goes here, maybe with some <strong>emphasized text</strong> in the middle of it.</p>
-        </blockquote>
-        <p>This is some additional paragraph placeholder content. It has been written to fill the available space and show how a longer snippet of text affects the surrounding content. We'll repeat it often to keep the demonstration flowing, so be on the lookout for this exact same string of text.</p>
-        <h3>Example table</h3>
-        <p>And don't forget about tables in these posts:</p>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Upvotes</th>
-              <th>Downvotes</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Alice</td>
-              <td>10</td>
-              <td>11</td>
-            </tr>
-            <tr>
-              <td>Bob</td>
-              <td>4</td>
-              <td>3</td>
-            </tr>
-            <tr>
-              <td>Charlie</td>
-              <td>7</td>
-              <td>9</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <td>Totals</td>
-              <td>21</td>
-              <td>23</td>
-            </tr>
-          </tfoot>
-        </table>
-
-        <p>This is some additional paragraph placeholder content. It's a slightly shorter version of the other highly repetitive body text used throughout.</p>
-      </article>
-
-      <article class="blog-post">
-        <h2 class="blog-post-title mb-1">New feature</h2>
-        <p class="blog-post-meta">December 14, 2020 by <a href="#">Chris</a></p>
-
-        <p>This is some additional paragraph placeholder content. It has been written to fill the available space and show how a longer snippet of text affects the surrounding content. We'll repeat it often to keep the demonstration flowing, so be on the lookout for this exact same string of text.</p>
-        <ul>
-          <li>First list item</li>
-          <li>Second list item with a longer description</li>
-          <li>Third list item to close it out</li>
-        </ul>
         <p>This is some additional paragraph placeholder content. It's a slightly shorter version of the other highly repetitive body text used throughout.</p>
       </article>
 

@@ -11,8 +11,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path( 'index', views.render_index, name = 'render_index' ),
-    path( 'test', views.render_test, name = 'render_test' ),
-    path( 'tag', views.render_template, name = 'render_template' ),
-    path( 'crawler', views.crawler_test, name = 'crawler_test' ),
+    path( 'index/', views.render_index, name = 'render_index' ),
+    path( 'test/', views.render_test, name = 'render_test' ),
+    path( 'test/<str:keyword_str>', views.render_test, name = 'render_test' ),
+    path( 'tag/', views.render_template, name = 'render_template' ),
+    path( 'crawler/', views.crawler_test, name = 'crawler_test' ),
     ] + static( settings.STATIC_URL, document_root = settings.STATIC_ROOT )

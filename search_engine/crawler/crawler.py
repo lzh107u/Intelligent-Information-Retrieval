@@ -11,6 +11,9 @@ from bs4 import BeautifulSoup
 import crawler.pubmed_nltk_analysis as pubmed
 import crawler.pattern_matching as pm
 
+import os.path as path
+import json 
+
 SEARCH_URL_PREFIX = 'https://pubmed.ncbi.nlm.nih.gov'
 
 ARTICLE_COUNT = 0
@@ -57,18 +60,18 @@ def parser_abstract_page( filename = '', buf = None ):
     flag_abstract = 0
     abstract_content = []
     nltk_dict = None
-    abstract_text = None
-    check_list = [ False, False, False, False ]
+    abstract_text = 'No abstract is povided.'
+    abstract_exist = False
     for index, line in enumerate( full_text ):
         if ( line.find( 'heading-title' ) > 0 ) and ( flag_title == 0 ):
-            check_list[ 0 ] = True
+            
             ARTICLE_COUNT += 1
             # extract article title.
             article_title = full_text[ index + 1 ].strip()
             print( ARTICLE_COUNT, 'title:', article_title )
             flag_title = 1
         if ( line.find( 'authors-list-item' ) > 0 ):
-            check_list[ 1 ] = True
+            
             # extract authors.
             new_name = full_text[ index + 2 ].strip()
             # remove redundant whitespaces
@@ -79,7 +82,7 @@ def parser_abstract_page( filename = '', buf = None ):
                 
                 authors_list.append( new_name ) # add newly found author.
         if ( line.find( 'enc-abstract' ) > 0 ):
-            check_list[ 2 ] = True
+            
             # start extracting the abstract of article.
             flag_abstract = 1
             
@@ -87,7 +90,7 @@ def parser_abstract_page( filename = '', buf = None ):
             abstract_content.append( line.strip() )
             # extract line-by-line.
         elif ( flag_abstract == 1 and line.strip() == '</div>' ):
-            check_list[ 3 ] = True
+            abstract_exist = True
             # stop extracting when encounter '</div>'
             abstract_text = pm.content_concat( abstract_content )
             # remove tags and concat every line together.
@@ -105,7 +108,7 @@ def parser_abstract_page( filename = '', buf = None ):
         'authors' : authors_list,
         'text' : abstract_text, # add concatenated text into dictionary.
         'nltk_dict' : nltk_dict,
-        'check' : check_list, 
+        'abstract_exist' : abstract_exist, 
         }
     return article_dict
 
@@ -141,12 +144,40 @@ def parser_search_page( article_list, buf = None, filename = '', read_file = Tru
             # remove the symbol '"' at the head and tail of 'href' tag.
             # the extracted result should be liked: /{article_code}/
             # print( 'searching url:', SEARCH_URL_PREFIX + res )
-            buf = send_crawler( url = SEARCH_URL_PREFIX + res )
+            url = SEARCH_URL_PREFIX + res
+            buf = send_crawler( url = url )
             # send crawler with article url.
             article_dict = parser_abstract_page( buf = buf )
-            # extract every useful info. in html page from crawler.  
+            # extract every useful info. in html page from crawler. 
+            article_dict[ 'url' ] = url
             article_list.append( article_dict )
     return res
+
+def read_existing_result( filename, article_list ):
+    # if current searching result had been stored before, 
+    # the crawler didn't need to be sent again.
+    
+    with open( 'crawler/PubMeds/' + filename, 'r' ) as f:
+        print( 'read_existing_result: called.' )
+        full_text = f.readlines()
+        # read entire file line-by-line
+        print( 'len of f:', len( full_text ) )
+        for article in full_text:
+            article = json.loads( article )
+            # transform string to dictionary.
+            article_list.append( article )
+            # append each article dictionary into list.
+            
+    return
+
+def create_result_file( filename, article_list ):
+    # if current searching result didn't exist,
+    # it should be created by this function to avoid
+    # the crashing due to repeatly sending crawler.
+    with open( 'crawler/PubMeds/' + filename, 'w' ) as f:
+        for index, article in enumerate( article_list ):
+            f.write( json.dumps( article ) )
+            f.write( '\n' )
 
 def parser_keyword( keyword_str ):
     # given a keyword string, returning a valid url keywords part.
@@ -162,24 +193,38 @@ def parser_keyword( keyword_str ):
         # it's proved that add a symbol '+' between '/?term=' and the first keyword was valid.
     return res
 
-def crawler_pipeline( page_count = 1 ):
+def file_keyword( keyword_str ):
+    keyword_list = keyword_str.lower().split()
+    res = ''
+    for word in keyword_list:
+        res = res + '+' + word
+    return res
+
+def crawler_pipeline( page_count = 1, default_keyword_str = 'Myotonic Dystrophy' ):
     global SEARCH_URL_PREFIX
     global ARTICLE_COUNT
     
     ARTICLE_COUNT = 0
     article_list = []
-    default_keyword_str = 'Myotonic Dystrophy'
     page_str = '&page='
     searching_str = parser_keyword( default_keyword_str )
-    for index in range( page_count ):
-        # example of an url:
-        #   general form: https://pubmed.ncbi.nlm.nih.gov/?term=+{keyword_1}+{keyword_2}&page={page_num}
-        #   e.g. : https://pubmed.ncbi.nlm.nih.gov/?term=+myotonic+dystrophy&page=2
-        buf = send_crawler( write_file = False, url = SEARCH_URL_PREFIX + searching_str + page_str + str( index + 1 ) )
-        # send a crawler with given url.
-        parser_search_page( article_list = article_list, read_file = False, buf = buf )
-        # parse the returned html page from crawler.
+    filename = file_keyword( default_keyword_str ) + '.txt'
     
+    if path.exists( 'crawler/PubMeds/' + filename ):
+        # read existing file.
+        read_existing_result( filename, article_list )
+        
+    else:
+        for index in range( page_count ):
+            # example of an url:
+            #   general form: https://pubmed.ncbi.nlm.nih.gov/?term=+{keyword_1}+{keyword_2}&page={page_num}
+            #   e.g. : https://pubmed.ncbi.nlm.nih.gov/?term=+myotonic+dystrophy&page=2
+            buf = send_crawler( write_file = False, url = SEARCH_URL_PREFIX + searching_str + page_str + str( index + 1 ) )
+            # send a crawler with given url.
+            parser_search_page( article_list = article_list, read_file = False, buf = buf )
+            # parse the returned html page from crawler.
+            create_result_file( filename, article_list )
+            
     return article_list
 
 if __name__ == '__main__':
