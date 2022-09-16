@@ -16,4 +16,6 @@ urlpatterns = [
     path( 'test/<str:keyword_str>', views.render_test, name = 'render_test' ),
     path( 'tag/', views.render_template, name = 'render_template' ),
     path( 'crawler/', views.crawler_test, name = 'crawler_test' ),
+    path( 'db/', views.db_test, name = 'db_test' ),
+    path( 'db/<str:keyword>', views.db_test, name = 'db_test' ),
     ] + static( settings.STATIC_URL, document_root = settings.STATIC_ROOT )

@@ -83,4 +83,23 @@ def nltk_pipeline( text ):
         'basic_feature' : basic_feat_dict,
         'freq_dict' : freq_dist_nltk,
         }
+    
+    """
+    format of nltk_dict:
+    {
+        basic_feature : dict
+        {
+            num_sentence : int,
+            num_word : int,
+            num_char : int,
+        },
+        freq_dict : dict
+        {
+            word1 : int,
+            word2 : int,
+            ...
+        },
+    }
+    
+    """
     return nltk_dict

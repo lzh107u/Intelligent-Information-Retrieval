@@ -6,7 +6,7 @@ from crawler.models import Keyword, TweetPost, RelWordInPost
 
 from crawler.stweet_test import json_parser
 from crawler.crawler import crawler_pipeline
-
+from crawler.tweet_ops import get_tweet
 from re import sub, compile
 
 # Create your views here.
@@ -103,3 +103,7 @@ def crawler_test( request ):
     
     return HttpResponse( 'crawler_test called.' )
 
+def db_test( request, keyword = 'midjourney' ):
+    get_tweet( keyword )
+    
+    return HttpResponse( 'db_test called.' )

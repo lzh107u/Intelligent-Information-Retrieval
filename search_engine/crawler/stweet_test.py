@@ -8,20 +8,21 @@ Created on Thu Sep  8 10:59:50 2022
 import stweet as st
 import json
 import re
+import os.path as path
 
 def try_search( keyword = '' ):
-    search_tweet_task = st.SearchTweetsTask( all_words = '#' + keyword )
-    output_jl_tweets = st.JsonLineFileRawOutput( keyword + '_raw_search_tweets.jl' )
-    output_jl_users = st.JsonLineFileRawOutput( keyword + '_raw_search_users.jl' )
-    output_print = st.PrintRawOutput()
+    search_tweet_task = st.SearchTweetsTask( all_words = keyword )
+    output_jl_tweets = st.JsonLineFileRawOutput( 'crawler/Tweets/' + keyword + '_tweets.jl' )
+    output_jl_users = st.JsonLineFileRawOutput( 'crawler/Tweets/' + keyword + '_users.jl' )
+    # output_print = st.PrintRawOutput()
     
     st.TweetSearchRunner( search_tweets_task = search_tweet_task, 
-                         tweet_raw_data_outputs = [ output_print, output_jl_tweets ], 
-                         user_raw_data_outputs = [ output_print, output_jl_users ] ).run()
+                         tweet_raw_data_outputs = [ output_jl_tweets ], 
+                         user_raw_data_outputs = [ output_jl_users ] ).run()
     
 def try_user_scrap():
     user_task = st.GetUsersTask( ['iga_swiatek' ] )
-    output_json = st.JsonLineFileRawOutput( 'output_raw_user.jl' )
+    output_json = st.JsonLineFileRawOutput( 'output_user.jl' )
     output_print = st.PrintRawOutput()
 
 
@@ -29,7 +30,7 @@ def try_user_scrap():
 
 def try_tweet_by_id_scrap():
     id_task = st.TweetsByIdTask( '1447348840164564994' )
-    output_json = st.JsonLineFileRawOutput( 'output_raw_id.jl' )
+    output_json = st.JsonLineFileRawOutput( 'output_id.jl' )
     output_print = st.PrintRawOutput()
     st.TweetsByIdRunner( tweets_by_id_task = id_task, raw_data_outputs = [ output_print, output_json ] ).run()
 
@@ -67,7 +68,7 @@ def parser_single_tweet( line ):
     post_timestamp = raw_value[ 'created_at' ]
     post_id = raw_value[ 'id' ]
     post_text = raw_value[ 'full_text' ]
-    post_media_dict = raw_value[ 'entities' ][ 'media' ][ 0 ]
+    post_media_dict = raw_value[ 'entities' ][ 'media' ][ 0 ] # get only first media of the post.
     post_hashtags = raw_value[ 'entities' ][ 'hashtags' ]
     media_url = post_media_dict[ 'media_url_https' ]
     post_url = post_media_dict[ 'url' ]
@@ -82,19 +83,35 @@ def parser_single_tweet( line ):
         'url' : post_url,
         'hashtags' : post_hashtags,
         }
-    # display_post( post_dict )
+    
     return post_dict
     
 def json_parser( keyword = 'midjourney', tweet_count = 3 ):
-    filename = 'crawler/' + keyword + '_raw_search_tweets.jl'
+    filename = 'crawler/Tweets/' + keyword + '_tweets.jl'
     with open( filename, 'r' ) as f:
         posts_list = []
         for count in range( tweet_count ):
-            line = f.readline()
-            posts_list.append( parser_single_tweet( line ) )
+            try:
+                line = f.readline()
+                posts_list.append( parser_single_tweet( line ) )
+                # parser_single_tweet() returned the content of a single tweet post in dict format.
+            except:
+                print( 'stweet, json_parser: end file reading.' )
+                break
         
-        
-        return posts_list
+        return posts_list # a list that contained the content of every post in dict format.
+
+def search_tweets( keyword = 'midjourney', tweet_count = 3 ):
+    if ( path.exists( "crawler/Tweets/" + keyword + '_tweets.jl' ) ):
+        print( 'stweet, search_tweets: file exists.' )
+        pass
+    else:
+        print( 'stweet, search_tweets: file does not exist.' )
+        try_search( keyword )
+        return search_tweets( keyword ) # receive a list from search_tweets() and return it to previous func.
+    
+    # json_parser() returned a list containing every post.
+    return json_parser( keyword, tweet_count )
 
 if __name__ == '__main__':
     keyword = 'midjourney'
