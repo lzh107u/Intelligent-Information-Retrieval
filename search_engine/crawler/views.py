@@ -7,10 +7,11 @@ from crawler.models import Keyword, TweetPost, RelWordInPost
 from crawler.stweet_test import json_parser
 from crawler.crawler import crawler_pipeline
 from crawler.tweet_ops import get_tweet
+from crawler.request_handler import find_keyword_handler, search_article_handler
 from re import sub, compile
 
 # Create your views here.
-TITLE_LIST = [ 'World', 'U.S.', 'Technology', 'Design', 'Culture', 'Business', 'Politics', 'Opinion', 'Science', 'Health', 'Style', 'Travel' ]
+
 PLUS = compile( '[\+]' )
 def render_index( request ): 
     print( 'views, render_index: called.' )
@@ -25,6 +26,10 @@ def render_test( request, keyword_str = 'Myotonic Dystrophy' ):
         form_type = request.POST.get( 'FormType' )
         if form_type == 'keyword':
             keyword_str = request.POST.get( 'Keyword' )
+        elif form_type == 'FindKeyword':
+            find_str = request.POST.get( 'FindKeyword' )
+            print( 'views, render_test: I want to find', find_str )
+            find_keyword_handler( keyword_str = find_str, article_type = 'PubMed' )
     
     keyword_str = sub( PLUS, ' ', keyword_str )
     count = 4 # how many twitter posts are needed for Carousel display.
@@ -32,7 +37,8 @@ def render_test( request, keyword_str = 'Myotonic Dystrophy' ):
     car_list = [] # store carousel posts.
     art_list = [] # store pubmed posts.
     
-    article_list = crawler_pipeline( page_count = 1, default_keyword_str = keyword_str )
+    article_list = search_article_handler( keyword_str = keyword_str )
+    # article_list = crawler_pipeline() # for temporary demo purpose.
     # get PubMed articles
     
     for index in range( count ):
@@ -49,7 +55,7 @@ def render_test( request, keyword_str = 'Myotonic Dystrophy' ):
         'pubmed_range': range( 10 ),
         }
     
-    # html_string = render_to_string( "crawler/test/index.html", context = content )
+    
     return render( request = request, template_name = "crawler/test/index.html", context = content )
 
 def render_template( request ):
@@ -78,6 +84,12 @@ def crawler_test( request ):
                 num_char : int,
             }
             freq_dict : dict,
+            {
+                word 1 : int, # the number of word appears in article
+                word 2 : int,
+                ...
+            }
+            freq_title : dict,
             {
                 word 1 : int, # the number of word appears in article
                 word 2 : int,

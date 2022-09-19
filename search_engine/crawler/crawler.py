@@ -94,15 +94,13 @@ def parser_abstract_page( filename = '', buf = None ):
             # stop extracting when encounter '</div>'
             abstract_text = pm.content_concat( abstract_content )
             # remove tags and concat every line together.
-            nltk_dict = pubmed.nltk_pipeline( abstract_text )
+            nltk_dict = pubmed.nltk_pipeline( article_title, abstract_text )
             # perform nltk analysis.
             
             break
     
     # some article didn't have the abstract part.
-    # print( '--------------------' )
-    # print( '     no abstract    ' )
-    # print( '--------------------' )
+    
     article_dict = {   
         'title' : article_title,
         'authors' : authors_list,
@@ -117,19 +115,17 @@ def parser_search_page( article_list, buf = None, filename = '', read_file = Tru
     if read_file == True:
         with open( filename, 'r', encoding = 'UTF-8' ) as f:
             full_text = f.readlines()
-            # print( 'file open' )
+            
     else:
         # buf from crawler was an entire html page
         # which could be divided into lines by '\n'
         full_text = buf.split( '\n' )
-        # print( 'parser_search_page: length of buf:', len( full_text ) )        
     
     if len( full_text ) < 1:
         # with buf.split() or f.readlines(), full_text should be a list
         # which contained entire html page line-by-line.
         # if the len of list is less than 1, the page information can't be extracted.
         
-        # print( 'parser_search_page: full_text length error.' )
         return False
     
     for index, line in enumerate( full_text ):
@@ -150,6 +146,8 @@ def parser_search_page( article_list, buf = None, filename = '', read_file = Tru
             article_dict = parser_abstract_page( buf = buf )
             # extract every useful info. in html page from crawler. 
             article_dict[ 'url' ] = url
+            res = res[ 1:-1 ]
+            article_dict[ 'code' ] = res
             article_list.append( article_dict )
     return res
 
@@ -158,10 +156,8 @@ def read_existing_result( filename, article_list ):
     # the crawler didn't need to be sent again.
     
     with open( 'crawler/PubMeds/' + filename, 'r' ) as f:
-        print( 'read_existing_result: called.' )
         full_text = f.readlines()
         # read entire file line-by-line
-        print( 'len of f:', len( full_text ) )
         for article in full_text:
             article = json.loads( article )
             # transform string to dictionary.
@@ -194,13 +190,16 @@ def parser_keyword( keyword_str ):
     return res
 
 def file_keyword( keyword_str ):
+    # turn keyword parts into lower case and split by space.
     keyword_list = keyword_str.lower().split()
     res = ''
     for word in keyword_list:
+        # concatenate each part without space.
         res = res + '+' + word
     return res
 
 def crawler_pipeline( page_count = 1, default_keyword_str = 'Myotonic Dystrophy' ):
+    # send crawler with a given keyword and return first 10 searching result.
     global SEARCH_URL_PREFIX
     global ARTICLE_COUNT
     
@@ -224,7 +223,6 @@ def crawler_pipeline( page_count = 1, default_keyword_str = 'Myotonic Dystrophy'
             parser_search_page( article_list = article_list, read_file = False, buf = buf )
             # parse the returned html page from crawler.
             create_result_file( filename, article_list )
-            
     return article_list
 
 if __name__ == '__main__':

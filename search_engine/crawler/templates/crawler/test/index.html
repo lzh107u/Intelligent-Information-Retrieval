@@ -221,21 +221,21 @@
       {% block posts %}
       {% for post in pubmed_list %}
       <article class="blog-post">
-        <h2>{{ post.title }}</h2>
+        <h2>{{ post.article.title }}</h2>
         <p class="blog-post-meta">
         {% for author in post.authors %}
             {{ author }},
         {% endfor %}
         view this article in 
-        <a href={{ post.url }}>MedPub</a></p>
-        <p>{{ post.text }}</p>
+        <a href={{ post.article.url }}>PubMed</a></p>
+        <p>{{ post.article.abstract }}</p>
         <hr>
         {% if post.abstract_exist %}
         <h3>Basic Features</h3>
         <ul>
-          <li>Number of sentences: {{ post.nltk_dict.basic_feature.num_sentence }}</li>
-          <li>Number of words: {{ post.nltk_dict.basic_feature.num_word }}</li>
-          <li>Number of characters: {{ post.nltk_dict.basic_feature.num_char }}</li>
+          <li>Number of sentences: {{ post.article.num_sentence }}</li>
+          <li>Number of words: {{ post.article.num_word }}</li>
+          <li>Number of characters: {{ post.article.num_char }}</li>
         </ul>
         {% endif %}
         
@@ -311,30 +311,19 @@
         </div>
 
         <div class="p-4">
-          <h4 class="fst-italic">Archives</h4>
-          <ol class="list-unstyled mb-0">
-            <li><a href="#">March 2021</a></li>
-            <li><a href="#">February 2021</a></li>
-            <li><a href="#">January 2021</a></li>
-            <li><a href="#">December 2020</a></li>
-            <li><a href="#">November 2020</a></li>
-            <li><a href="#">October 2020</a></li>
-            <li><a href="#">September 2020</a></li>
-            <li><a href="#">August 2020</a></li>
-            <li><a href="#">July 2020</a></li>
-            <li><a href="#">June 2020</a></li>
-            <li><a href="#">May 2020</a></li>
-            <li><a href="#">April 2020</a></li>
-          </ol>
-        </div>
-
-        <div class="p-4">
-          <h4 class="fst-italic">Elsewhere</h4>
-          <ol class="list-unstyled">
-            <li><a href="#">GitHub</a></li>
-            <li><a href="#">Twitter</a></li>
-            <li><a href="#">Facebook</a></li>
-          </ol>
+          <form class="p-4 p-md-5 border rounded-3 bg-light" action="/crawler/test/" method="POST">
+            {% csrf_token %}
+            <div class="form-floating mb-3">
+              <input type="hidden" name="FormType" value="FindKeyword">
+              <input type="text" class="form-control" placeholder="type" name="FindKeyword">
+              
+              <label for="floatingInput">keyword</label>
+            </div>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Search</button>
+            <hr class="my-4">
+            <small class="text-muted">Enter a keyword and click to search.</small>
+          </form>
+        
         </div>
       </div>
     </div>
