@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Homework 1</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
+<style>
+body, html {
+  height: 100%;
+  font-family: "Inconsolata", sans-serif;
+}
+
+.bgimg {
+  background-position: center;
+  background-size: cover;
+  background-image: url("https://cdn.eso.org/images/banner1920/eso2202a.jpg");
+  min-height: 75%;
+}
+
+.menu {
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<!-- Links (sit on top) -->
+<div class="w3-top">
+  <div class="w3-row w3-padding w3-black"></div>
+</div>
+
+<!-- Header with image -->
+<header class="bgimg w3-display-container w3-grayscale-min" id="home">
+  <div class="w3-display-bottomleft w3-center w3-padding-large w3-hide-small">
+    <span class="w3-tag">New planet detected around star closest to the Sun</span>
+  </div>
+  <div class="w3-display-middle w3-center">
+    <span class="w3-text-white" style="font-size:90px">Full-Text<br>  Retrieval Tool</span>
+  </div>
+  <div class="w3-display-bottomright w3-center w3-padding-large">
+    <span class="w3-text-white">10 February 2022</span>
+  </div>
+</header>
+
+<!-- Add a background color and large text to the whole page -->
+<div class="w3-sand w3-grayscale w3-large">
+
+<!-- About Container 1-->
+<div class="w3-container" id="about">
+  <div class="w3-content" style="max-width:700px">
+    <h5 class="w3-center w3-padding-64"><span class="w3-tag w3-wide">STEP 1: UPLOAD THE DOCUMENT</span></h5>
+    <div class="w3-container" id="where" style="padding-bottom:32px;">
+      <div class="w3-content" style="max-width:700px">
+        <p><strong>Select the file</strong> - It must be 'json' or 'xml' format.</p>
+        <form method="post" enctype="multipart/form-data" action="upload">
+          {% csrf_token %}
+          <p><input class="w3-input w3-padding-16 w3-border" type="file" name="document"></p>
+          <p><button class="w3-button w3-black" type="submit">Upload file</button></p>
+        </form>
+      </div>
+    </div>
+    <p><strong>{{format_alert}}</strong></p>
+    <p>{{count_char}}</p>
+    <p>{{count_word}}</p>
+    <p>{{count_sentence}}</p>
+    <div class="w3-panel w3-leftbar w3-light-grey">
+      <p>Development Environment</p>
+      <p>1. Docker</p>
+      <p>2. Django + W3school CSS Template</p>
+      <p>3. Packages - re, nltk, json, xml.etree.ElementTree</p>
+    </div>
+    {% load static %}
+    <img src="{% static 'textRetrieval\img\flow chart.png'  %}" style="width:100%;max-width:1000px" class="w3-margin-top">
+    <p style="text-align: center"><strong>Flow Chart</strong></p>
+  </div>
+</div>
+
+<!-- About Container 2-->
+<div class="w3-container" id="about">
+  <div class="w3-content" style="max-width:700px">
+    <h5 class="w3-center w3-padding-64"><span class="w3-tag w3-wide">STEP 2: SEARCH SOME KEYWORDS</span></h5>
+    <div class="w3-container" id="where" style="padding-bottom:32px;">
+      <div class="w3-content" style="max-width:700px">
+        <p><strong>Key the word</strong> - which you want to know more about it.</p>
+        <form method="post" action="search">
+          {% csrf_token %}
+          <p><input class="w3-input w3-padding-16 w3-border" type="text" name="keyword"></p>
+          <p><button class="w3-button w3-black" type="submit">Search it</button></p>
+        </form>
+      </div>
+    </div>
+    <p>{{key}}</p>
+    <p>{{result}}</p>
+    <div class="w3-panel w3-leftbar w3-light-grey">
+      {% for i in search_infos %}
+      <p>{{i.sent1}}<i><strong>{{i.keyword}}</strong></i>{{i.sent2}}</p>
+      <!-- <p>Chef, Coffeeist and Owner: Liam Brown</p> -->
+      {% endfor %}
+      
+    </div>
+    <!-- <img src="https://i2.wp.com/coinotizia.com/wp-content/uploads/2022/09/starbucks-leverages-polygon-for-web3-push-coffeehouse-chain-to-issue-nft-stamps.jpg" style="width:100%;max-width:1000px" class="w3-margin-top">
+    <p><strong>Opening hours:</strong> everyday from 6am to 5pm.</p>
+    <p><strong>Address:</strong> 15 Adr street, 5015, NY</p> -->
+    <div class="w3-panel w3-leftbar w3-light-grey">
+      <p>Difficulties</p>
+      <p>1. 當我在Twitter上想要爬文時，遇到權限不足的問題，使得無法成功擷取到想要的tweets。於是，後來改以「上傳檔案」的方式進行。</p>
+      <p>2. 原本想要用正規表達式判斷句子，但是想不到該如何處理"Mr. Brown"這種問題(它會被判斷成一個句子)，最後使用nltk套件的sent_tokenize才正確分割出句子。</p>
+    </div>
+    <div class="w3-panel w3-leftbar w3-light-grey">
+      <p>What I learnt in this homework</p>
+      <p>1. 學習如何擷取xml和json格式的資訊</p>
+      <p>2. 學習做簡單的前處理，例如：stopwords、tokenize</p>
+      <p>3. 學習如何上傳檔案以及搜尋關鍵字</p>
+    </div>
+  </div>
+</div>
+
+<!-- End page content -->
+</div>
+
+<!-- Footer -->
+<footer class="w3-center w3-light-grey w3-padding-48 w3-large">
+  <p>Template is from <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-text-green">w3.css</a></p>
+  <p>Project's author is <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-text-green">Tsao Ching Chieh</a></p>
+</footer>
+
+<script>
+// Tabbed Menu
+function openMenu(evt, menuName) {
+  var i, x, tablinks;
+  x = document.getElementsByClassName("menu");
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < x.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" w3-dark-grey", "");
+  }
+  document.getElementById(menuName).style.display = "block";
+  evt.currentTarget.firstElementChild.className += " w3-dark-grey";
+}
+document.getElementById("myLink").click();
+</script>
+
+</body>
+</html>

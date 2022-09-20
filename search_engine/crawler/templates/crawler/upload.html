@@ -1,0 +1,9 @@
+<!doctype html>
+
+<form id="myform" method="POST" action="/crawler/db/" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="FormType" value="upload">
+    <input type="file" name="myfile">
+    <input type="file" id="profile_pic" name="profile_pic" accept=".jpg, .jpeg .png">
+    <input type="submit"> 
+</form>

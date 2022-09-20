@@ -77,7 +77,35 @@
           object-fit: cover;
           width: 2000px;
       }
-      
+      .custom-file-upload {
+            border: 1px solid #ccc;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+      }
+      .inputWrapper {
+        height: 32px;
+        width: 64px;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        <!--Using a background color, but you can use a background image to represent a button-->
+        background-color: #DDF;
+    }
+    .fileInput {
+        cursor: pointer;
+        height: 100%;
+        position:absolute;
+        top: 0;
+        right: 0;
+        z-index: 99;
+        <!--This makes the button huge. If you want a bigger button, increase the font size-->
+        font-size:50px;
+        <!--Opacity settings for all browsers-->
+        opacity: 0;
+        -moz-opacity: 0;
+        filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0)
+    }
     </style>
 
     
@@ -100,7 +128,7 @@
         <div class="collapse navbar-collapse" id="navbarCollapse">
           <ul class="navbar-nav me-auto mb-2 mb-md-0">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Home</a>
+              <a class="nav-link active" aria-current="page" href="/crawler/test/">Home</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="https://pubmed.ncbi.nlm.nih.gov/">PubMed</a>
@@ -170,6 +198,7 @@
 </div>
 
 <main class="container">
+<!--
   <div class="p-4 p-md-5 mb-4 rounded text-bg-dark">
     <div class="col-md-6 px-0">
       <h1 class="display-4 fst-italic">Title of a longer featured blog post</h1>
@@ -178,7 +207,8 @@
     {% endblock Car %}
     </div>
   </div>
-
+-->
+<!--
   <div class="row mb-2">
     <div class="col-md-6">
       <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
@@ -211,7 +241,7 @@
       </div>
     </div>
   </div>
-
+-->
   <div class="row g-5">
 <!-- start of posts display area -->
     <div class="col-md-8">
@@ -226,9 +256,21 @@
         {% for author in post.authors %}
             {{ author }},
         {% endfor %}
-        view this article in 
-        <a href={{ post.article.url }}>PubMed</a></p>
+        view this article 
+        <a href={{ post.article.url }}>here</a>.</p>
+        
+        {% if search_flag %}
+            {% for word in post.article.abstract %}
+                {% if word == compare_str %}
+                    <font color="#FF0000">{{ word }}</font>
+                {% else %}
+                    {{ word }}
+                {% endif %}
+            {% endfor %}
+        {% else %}
         <p>{{ post.article.abstract }}</p>
+        {% endif %}
+        
         <hr>
         {% if post.abstract_exist %}
         <h3>Basic Features</h3>
@@ -242,59 +284,6 @@
       </article>
       {% endfor %}
       {% endblock posts %}
-      <article class="blog-post">
-        <h2 class="blog-post-title mb-1">Sample blog post</h2>
-        <p class="blog-post-meta">January 1, 2021 by <a href="#">Mark</a></p>
-
-        <p>This blog post shows a few different types of content that’s supported and styled with Bootstrap. Basic typography, lists, tables, images, code, and more are all supported as expected.</p>
-        <hr>
-        <p>This is some additional paragraph placeholder content. It has been written to fill the available space and show how a longer snippet of text affects the surrounding content. We'll repeat it often to keep the demonstration flowing, so be on the lookout for this exact same string of text.</p>
-        <h2>Blockquotes</h2>
-        <p>This is an example blockquote in action:</p>
-        <blockquote class="blockquote">
-          <p>Quoted text goes here.</p>
-        </blockquote>
-        <p>This is some additional paragraph placeholder content. It has been written to fill the available space and show how a longer snippet of text affects the surrounding content. We'll repeat it often to keep the demonstration flowing, so be on the lookout for this exact same string of text.</p>
-        <h3>Example lists</h3>
-        <p>This is some additional paragraph placeholder content. It's a slightly shorter version of the other highly repetitive body text used throughout. This is an example unordered list:</p>
-        <ul>
-          <li>First list item</li>
-          <li>Second list item with a longer description</li>
-          <li>Third list item to close it out</li>
-        </ul>
-        <p>And this is an ordered list:</p>
-        <ol>
-          <li>First list item</li>
-          <li>Second list item with a longer description</li>
-          <li>Third list item to close it out</li>
-        </ol>
-        <p>And this is a definition list:</p>
-        <dl>
-          <dt>HyperText Markup Language (HTML)</dt>
-          <dd>The language used to describe and define the content of a Web page</dd>
-          <dt>Cascading Style Sheets (CSS)</dt>
-          <dd>Used to describe the appearance of Web content</dd>
-          <dt>JavaScript (JS)</dt>
-          <dd>The programming language used to build advanced Web sites and applications</dd>
-        </dl>
-        <h2>Inline HTML elements</h2>
-        <p>HTML defines a long list of available inline tags, a complete list of which can be found on the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element">Mozilla Developer Network</a>.</p>
-        <ul>
-          <li><strong>To bold text</strong>, use <code class="language-plaintext highlighter-rouge">&lt;strong&gt;</code>.</li>
-          <li><em>To italicize text</em>, use <code class="language-plaintext highlighter-rouge">&lt;em&gt;</code>.</li>
-          <li>Abbreviations, like <abbr title="HyperText Markup Language">HTML</abbr> should use <code class="language-plaintext highlighter-rouge">&lt;abbr&gt;</code>, with an optional <code class="language-plaintext highlighter-rouge">title</code> attribute for the full phrase.</li>
-          <li>Citations, like <cite>— Mark Otto</cite>, should use <code class="language-plaintext highlighter-rouge">&lt;cite&gt;</code>.</li>
-          <li><del>Deleted</del> text should use <code class="language-plaintext highlighter-rouge">&lt;del&gt;</code> and <ins>inserted</ins> text should use <code class="language-plaintext highlighter-rouge">&lt;ins&gt;</code>.</li>
-          <li>Superscript <sup>text</sup> uses <code class="language-plaintext highlighter-rouge">&lt;sup&gt;</code> and subscript <sub>text</sub> uses <code class="language-plaintext highlighter-rouge">&lt;sub&gt;</code>.</li>
-        </ul>
-        <p>Most of these elements are styled by browsers with few modifications on our part.</p>
-        <h2>Heading</h2>
-        <p>This is some additional paragraph placeholder content. It has been written to fill the available space and show how a longer snippet of text affects the surrounding content. We'll repeat it often to keep the demonstration flowing, so be on the lookout for this exact same string of text.</p>
-        <h3>Sub-heading</h3>
-        <p>This is some additional paragraph placeholder content. It has been written to fill the available space and show how a longer snippet of text affects the surrounding content. We'll repeat it often to keep the demonstration flowing, so be on the lookout for this exact same string of text.</p>
-        <pre><code>Example code block</code></pre>
-        <p>This is some additional paragraph placeholder content. It's a slightly shorter version of the other highly repetitive body text used throughout.</p>
-      </article>
 
       <nav class="blog-pagination" aria-label="Pagination">
         <a class="btn btn-outline-primary rounded-pill" href="#">Older</a>
@@ -311,13 +300,15 @@
         </div>
 
         <div class="p-4">
-          <form class="p-4 p-md-5 border rounded-3 bg-light" action="/crawler/test/" method="POST">
+          <form class="p-4 p-md-5 border rounded-3 bg-light" action="/crawler/test/" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-floating mb-3">
               <input type="hidden" name="FormType" value="FindKeyword">
               <input type="text" class="form-control" placeholder="type" name="FindKeyword">
-              
               <label for="floatingInput">keyword</label>
+            </div>
+            <div class="form-floating mb-3">
+              <input type="file" name="myfile">
             </div>
             <button class="w-100 btn btn-lg btn-primary" type="submit">Search</button>
             <hr class="my-4">

@@ -68,14 +68,18 @@ def basic_feature( text ):
     
     return basic_feat_dict
 
-def nltk_pipeline( title, text ):
+def nltk_pipeline( title = None, text = None ):
     basic_feat_dict = basic_feature( text )
     text, token = text_preprocess( text )
-    title, title_token = text_preprocess( title )
+    if title is not None:
+        title, title_token = text_preprocess( title )
+        freq_dict_title = nltk.FreqDist( title_token )
+    else:
+        freq_dict_title = None
     # print( 'nltk_pipeline, processed text:' )
     # print( text )
     freq_dict_nltk = nltk.FreqDist( token )
-    freq_dict_title = nltk.FreqDist( title_token )
+    
     # print( token )
     for keyword, value in freq_dict_nltk.items():
         # print( str( keyword ) + ':' + str( value ) )

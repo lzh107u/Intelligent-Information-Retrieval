@@ -11,7 +11,8 @@ class TweetPost( models.Model ):
     ID = models.AutoField( primary_key = True )
     content_text = models.CharField( max_length = 500 )
     post_id = models.IntegerField( default = -1 )
-    img_url = models.CharField( max_length = 200 )
+    img_url = models.CharField( max_length = 200 ) 
+    # only store the first media url.
     num_word = models.IntegerField( default = 0 )
     num_char = models.IntegerField( default = 0 )
     num_sentence = models.IntegerField( default = 0 )

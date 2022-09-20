@@ -10,6 +10,8 @@ import json
 import re
 import os.path as path
 
+from crawler.pubmed_nltk_analysis import nltk_pipeline
+
 def try_search( keyword = '' ):
     search_tweet_task = st.SearchTweetsTask( all_words = keyword )
     output_jl_tweets = st.JsonLineFileRawOutput( 'crawler/Tweets/' + keyword + '_tweets.jl' )
@@ -85,7 +87,43 @@ def parser_single_tweet( line ):
         }
     
     return post_dict
+
+def parser_sample_file( filename, line ):
+    parsed_dict = json.loads( line )[ 0 ] 
+    # it will return a list, in case of a single string contain multiple dictionary.
+    # print( parsed_dict )
+    article = {
+        'title' : filename
+        }
+    authors = []
+    for name in parsed_dict:
+        if name.lower() == 'text' or name.lower() == 'tweet_text':
+            # tweet content.
+            article[ 'abstract' ] = parsed_dict[ name ]
+            nltk_dict = nltk_pipeline( text = parsed_dict[ name ] )
+            article[ 'num_word' ] = nltk_dict[ 'basic_feature' ][ 'num_word' ]
+            article[ 'num_char' ] = nltk_dict[ 'basic_feature' ][ 'num_char' ]
+            article[ 'num_sentence' ] = nltk_dict[ 'basic_feature' ][ 'num_sentence' ]
+            
+        elif name.lower()  == 'username':
+            user = parsed_dict[ name ]
+            if len( user ) == 0:
+                # no username is provided.
+                user = '( not provided )'
+            authors.append( user )
+        elif name.lower() == 'urls' or name.lower() == 'twitter_url':
+            urls = parsed_dict[ name ]
+            if len( urls ) < 10:
+                urls = '#'
+            article[ 'url' ] = urls
     
+    article_dict = {
+        'article' : article,
+        'authors' : authors
+        }
+    
+    return article_dict
+
 def json_parser( keyword = 'midjourney', tweet_count = 3 ):
     filename = 'crawler/Tweets/' + keyword + '_tweets.jl'
     with open( filename, 'r' ) as f:

@@ -9,6 +9,12 @@ from crawler.models import Keyword, TweetPost, RelWordInPost
 from crawler.stweet_test import search_tweets
 from crawler.pubmed_nltk_analysis import nltk_pipeline
 
+def tweet_find_keyword( keyword ):
+    
+    
+    
+    return 
+
 def store_tweets( list_posts, keyword ):
     
     for index, post in enumerate( list_posts ):
@@ -66,9 +72,10 @@ def get_tweet( keyword = 'ukraine' ):
         new_word = Keyword( word = keyword ) # current keyword doesn't exist, add it into database.
         new_word.save()
         for word in Keyword.objects.all():
-            print( word.word )
-            
-        ret = search_tweets( keyword, tweet_count = 30 )
+            # print( word.word )
+            pass
+        
+        ret = search_tweets( keyword, tweet_count = 300 )
         store_tweets( ret, keyword )
     else:
         db_rel_res = RelWordInPost.objects.filter( word = db_keyword[ 0 ] )
