@@ -63,7 +63,8 @@ def find_pubmed_keyword( keyword_str = '' ):
             
             article_dict = {
                 'article' : article_obj,
-                'authors' : author_list
+                'authors' : author_list,
+                'abstract_exist' : True,
                 }
             find_keyword_list.append( article_dict )
             print( 'keyword:', keyword_str, 'title:', title )
@@ -188,7 +189,9 @@ def find_articles( keyword_str = '', article_type = 'PubMed' ):
                         Author_list = copy.deepcopy( author_list )
                     article_dict = {
                         'article' : article_obj,
-                        'authors' : Author_list }
+                        'authors' : Author_list,
+                        'abstract_exist' : True,
+                        }
                     result_list.append( article_dict )
                     
     return result_list
@@ -278,6 +281,7 @@ def sample_handler( filename, content ):
         article_dict = {
             'article' : article,
             'authors' : authors,
+            'abstract_exist' : True,
             }
         return article_dict
     else:

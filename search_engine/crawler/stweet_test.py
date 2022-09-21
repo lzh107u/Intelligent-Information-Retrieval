@@ -119,7 +119,8 @@ def parser_sample_file( filename, line ):
     
     article_dict = {
         'article' : article,
-        'authors' : authors
+        'authors' : authors,
+        'abstract_exist' : True,
         }
     
     return article_dict
